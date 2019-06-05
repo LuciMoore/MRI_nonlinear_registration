@@ -159,6 +159,7 @@ def register(warped_dir, subject_Tws, atlas_images, atlas_segmentations, n_jobs)
 
     wf.config['execution']['parameterize_dirs'] = False
     wf.config['execution']['remove_unnecessary_outputs'] = False
+    wf.config['execution']['stop_on_first_crash'] = True
 
     #create workflow graph
     wf.write_graph()
