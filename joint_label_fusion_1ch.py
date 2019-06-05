@@ -2,13 +2,6 @@
 # standard lib
 
 '''
-this subject has issues with its mask that need to be investigated:
-/home/exacloud/lustre1/fnl_lab/data/HCP/processed/BCP/BCP_NEO_ATROPOS_4/sub-198549/ses-1m/files/T1w/T1w_acpc_dc_restore_brain.nii.gz
-
-Subjects tested:
-/home/exacloud/lustre1/fnl_lab/data/HCP/processed/BCP/BCP_NEO_ATROPOS_4/sub-375518/ses-1m/files/T1w/T1w_acpc_dc_restore_brain.nii.gz
-/home/exacloud/lustre1/fnl_lab/data/HCP/processed/BCP/BCP_NEO_ATROPOS_4/sub-116056/ses-3m/files/T1w/T1w_acpc_dc_restore_brain.nii.gz
-
 joint_fusion_folder:
 /home/exacloud/lustre1/fnl_lab/code/internal/pipelines/HCP_release_20161027_Infant_v2.0/global/templates/babyCouncil
 

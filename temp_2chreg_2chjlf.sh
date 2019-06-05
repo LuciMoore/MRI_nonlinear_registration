@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-#SBATCH --mem-per-cpu 4G
+#SBATCH --mem-per-cpu 8G
 #SBATCH --time 36:00:00
 #SBATCH --cpus-per-task 10
 #SBATCH --output jlf_2chreg_2chjlf_output.txt
@@ -10,10 +10,9 @@ if [ $# -eq 0 ]; then
   exit
 fi
 
-T1WIMAGE="$1"
-T2WIMAGE="$2"
+T1WFOLDER="$1"
 JLFFOLDER="$3"
 SUBJECTID="$4"
 NCPUS=$SLURM_CPUS_PER_TASK
 
-python /home/users/moorlu/PycharmProjects/jlf/temp_2chreg_2chjlf.py "$T1WIMAGE" "$T2WIMAGE" "$JLFFOLDER" "$SUBJECTID" --njobs "$NCPUS"
+python /home/users/moorlu/PycharmProjects/jlf/temp_2chreg_2chjlf.py "$T1WFOLDER" "$JLFFOLDER" "$SUBJECTID" --njobs "$NCPUS"
