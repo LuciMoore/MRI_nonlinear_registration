@@ -5,6 +5,8 @@
 joint_fusion_folder:
 /home/exacloud/lustre1/fnl_lab/code/internal/pipelines/HCP_release_20161027_Infant_v2.0/global/templates/babyCouncil
 
+/home/exacloud/lustre1/fnl_lab/data/HCP/processed/BCP/BCP_NEO_ATROPOS_4/sub-116056/ses-3m/files/T1w/T1w_acpc_dc_restore_brain.nii.gz
+
 
 Note: had to use different Atropos mask from 4_4 and then fill in the holes of the mask using fslmaths -fillh. then had
 to create new T1w and T2w restored brain (skull-stripped) by using this mask to mask T1w brain (fslmaths -mas)
@@ -15,7 +17,6 @@ Joint label fusion works by non-linearly registering a list of atlases and segme
 
 import argparse
 import os
-import numpy as np
 from glob import glob
 import random
 
@@ -26,11 +27,10 @@ from nipype.interfaces import ants, utility
 
 def main():
     parser = generate_parser()
-
     args = parser.parse_args()
     subject_image = args.subject_image
     jlf_folder = args.joint_fusion_folder
-    subid = args.subject_id
+    subjectid = args.subjectid
     njobs = args.njobs
 
     pattern = os.path.join(jlf_folder, 'Template*')
@@ -44,18 +44,9 @@ def main():
     for i in template_list:
         atlas_segmentations.append(os.path.join(i, "Segmentation.nii.gz"))
 
-    # atlas_seg_pairs = []
-    # for i, file in enumerate(os.walk(jlf_folder)):
-    #     if i == 0:
-    #         continue
-    #     files = file[-1]
-    #     atlas_seg_pairs.append(files)
-    #
-    # atlas_images, atlas_segmentations = zip(*atlas_seg_pairs)
 
-    # randint = np.array([1000])
-    # randint = random.randint(1,100)
-    warped_dir = os.path.join('./jlf_1ch_dir', 'jlf{}'.format(subid))
+    #randint = random.randint(1,100)
+    warped_dir = os.path.join('./jlf_dir', 'jlf{}'.format(subjectid))
 
     # subject T1w brain image
     #subject_T1w = os.path.join(subject_dir, 'T1w_acpc_dc_restore_brain.nii.gz')
@@ -71,7 +62,7 @@ def generate_parser():
 
     parser.add_argument('subject_image', help='path to subject T1w')
     parser.add_argument('joint_fusion_folder', help='path to joint label fusion atlas directory')
-    parser.add_argument('subject_id', help='subject id')
+    parser.add_argument('subjectid', help='whatever name you want for subfolder')
     parser.add_argument('--njobs', default=1, type=int, help='number of cpus to utilize')
 
     return parser
@@ -83,14 +74,14 @@ def register(warped_dir, subject_T1w, atlas_images, atlas_segmentations, n_jobs)
 
     input_spec = pe.Node(
         utility.IdentityInterface(
-            fields=['subject_T1w', 'sub_T1w_list', 'atlas_image', 'atlas_segmentation']),
+            fields=['subject_image', 'sub_image_list', 'atlas_image', 'atlas_segmentation']),
         iterables=[('atlas_image', atlas_images), ('atlas_segmentation', atlas_segmentations)],
         synchronize=True,
         name='input_spec'
     )
     # set input_spec
-    input_spec.inputs.subject_T1w = subject_T1w
-    input_spec.inputs.sub_T1w_list = sub_Tw1_list  # need to do this bc JLF requires target image to be a list
+    input_spec.inputs.subject_image = subject_T1w
+    input_spec.inputs.sub_image_list = sub_Tw1_list  # need to do this bc JLF requires target image to be a list
 
     '''
     CC[x, x, 1, 8]: [fixed, moving, weight, radius]
@@ -106,6 +97,7 @@ def register(warped_dir, subject_T1w, atlas_images, atlas_segmentations, n_jobs)
         ants.Registration(
             dimension=3,
             output_transform_prefix="output_",
+            collapse_output_transforms = False,
             # interpolation='BSpline',
             transforms=['Affine', 'SyN'],
             transform_parameters=[(2.0,), (0.25,)],  # default values syn
@@ -154,18 +146,19 @@ def register(warped_dir, subject_T1w, atlas_images, atlas_segmentations, n_jobs)
     )
 
     wf = pe.Workflow(name='wf', base_dir=warped_dir)
-    wf.connect(input_spec, 'subject_T1w', reg, 'fixed_image')
+
+    wf.connect(input_spec, 'subject_image', reg, 'fixed_image')
     wf.connect(input_spec, 'atlas_image', reg, 'moving_image')
 
     wf.connect(reg, 'forward_transforms', applytransforms_atlas, 'transforms')
     wf.connect(input_spec, 'atlas_image', applytransforms_atlas, 'input_image')
-    wf.connect(input_spec, 'subject_T1w', applytransforms_atlas, 'reference_image')
+    wf.connect(input_spec, 'subject_image', applytransforms_atlas, 'reference_image')
 
     wf.connect(reg, 'forward_transforms', applytransforms_segs, 'transforms')
     wf.connect(input_spec, 'atlas_segmentation', applytransforms_segs, 'input_image')
-    wf.connect(input_spec, 'subject_T1w', applytransforms_segs, 'reference_image')
+    wf.connect(input_spec, 'subject_image', applytransforms_segs, 'reference_image')
 
-    wf.connect(input_spec, 'sub_T1w_list', jointlabelfusion, 'target_image')
+    wf.connect(input_spec, 'sub_image_list', jointlabelfusion, 'target_image')
     wf.connect(applytransforms_atlas, 'output_image', jointlabelfusion, 'atlas_image')
     wf.connect(applytransforms_segs, 'output_image', jointlabelfusion, 'atlas_segmentation_image')
 

@@ -37,7 +37,7 @@ def main():
         atlas_segmentations.append(os.path.join(i, "Segmentation.nii.gz"))
 
     #randint = random.randint(1,100)
-    warped_dir = os.path.join('./jlf_2chreg__saveoutputs_dir', 'jlf{}'.format(subid))
+    warped_dir = os.path.join('./jlf_2chreg_dir', 'jlf{}'.format(subid))
 
     #subject T1w brain image
     subject_T1w = os.path.join(subject_T1w_folder, 'T1w_acpc_dc_restore_brain.nii.gz')
@@ -158,8 +158,8 @@ def register(warped_dir, subject_Tws, atlas_images, atlas_segmentations, n_jobs)
     wf.connect(applytransforms_segs, 'output_image', jointlabelfusion, 'atlas_segmentation_image')
 
     wf.config['execution']['parameterize_dirs'] = False
-    wf.config['execution']['remove_unnecessary_outputs'] = False
-    wf.config['execution']['stop_on_first_crash'] = True
+    #wf.config['execution']['remove_unnecessary_outputs'] = False
+    #wf.config['execution']['stop_on_first_crash'] = True
 
     #create workflow graph
     wf.write_graph()
