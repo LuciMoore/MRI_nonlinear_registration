@@ -9,7 +9,7 @@ networkx==2.2
 neurdflib==5.0.0.post1
 nibabel==2.3.3
 nipype==1.2.1
-numpy==1.16.2
+numpy==1.22.0
 packaging==19.0
 prov==1.5.3
 pydot==1.4.1
