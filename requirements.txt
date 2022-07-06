@@ -4,7 +4,7 @@ decorator==4.4.0
 funcsigs==1.0.2
 future==0.17.1
 isodate==0.6.0
-lxml==4.3.3
+lxml==4.9.1
 networkx==2.2
 neurdflib==5.0.0.post1
 nibabel==2.3.3
